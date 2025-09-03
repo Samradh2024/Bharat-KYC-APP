@@ -1,0 +1,36 @@
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import { resolve } from 'path'
+
+// https://vitejs.dev/config/
+export default defineConfig({
+  plugins: [react()],
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, 'src'),
+    },
+  },
+  build: {
+    target: 'es2015', // Support older devices
+    minify: 'terser',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          router: ['react-router-dom'],
+          ui: ['lucide-react', 'framer-motion'],
+          forms: ['react-hook-form', 'react-select'],
+          media: ['react-webcam', 'react-dropzone'],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 1000,
+  },
+  server: {
+    port: 3000,
+    host: true,
+  },
+  optimizeDeps: {
+    include: ['react', 'react-dom'],
+  },
+})
