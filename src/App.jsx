@@ -65,8 +65,17 @@ function App() {
 
   if (!isInitialized) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <LoadingSpinner size="large" />
+      <div className="min-h-screen bg-gradient-primary flex items-center justify-center relative overflow-hidden">
+        {/* Animated background elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-white/5 rounded-full animate-float"></div>
+          <div className="absolute top-1/3 right-1/4 w-24 h-24 bg-white/5 rounded-full animate-float" style={{ animationDelay: '2s' }}></div>
+          <div className="absolute bottom-1/3 left-1/3 w-20 h-20 bg-white/5 rounded-full animate-float" style={{ animationDelay: '4s' }}></div>
+        </div>
+        
+        <div className="relative z-10">
+          <LoadingSpinner size="xlarge" color="white" variant="ring" text="Initializing..." />
+        </div>
       </div>
     )
   }
@@ -84,9 +93,20 @@ function App() {
             <link rel="apple-touch-icon" href="/icon-192x192.png" />
           </Helmet>
 
-          <div className="min-h-screen bg-gray-50">
+          <div className="min-h-screen bg-gradient-primary relative">
             {/* Offline Indicator */}
-            {!isOnline && <OfflineIndicator />}
+            <AnimatePresence>
+              {!isOnline && (
+                <motion.div
+                  initial={{ y: -100, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  exit={{ y: -100, opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <OfflineIndicator />
+                </motion.div>
+              )}
+            </AnimatePresence>
             
             {/* Network Status */}
             <NetworkStatus />
@@ -97,7 +117,11 @@ function App() {
                 <Route 
                   path="/" 
                   element={
-                    <Suspense fallback={<LoadingSpinner />}>
+                    <Suspense fallback={
+                      <div className="min-h-screen bg-gradient-primary flex items-center justify-center">
+                        <LoadingSpinner size="large" color="white" variant="dots" />
+                      </div>
+                    }>
                       <WelcomeScreen />
                     </Suspense>
                   } 
@@ -105,7 +129,11 @@ function App() {
                 <Route 
                   path="/kyc-selection" 
                   element={
-                    <Suspense fallback={<LoadingSpinner />}>
+                    <Suspense fallback={
+                      <div className="min-h-screen bg-gradient-primary flex items-center justify-center">
+                        <LoadingSpinner size="large" color="white" variant="wave" />
+                      </div>
+                    }>
                       <KYCSelection />
                     </Suspense>
                   } 
@@ -113,7 +141,11 @@ function App() {
                 <Route 
                   path="/digilocker-kyc" 
                   element={
-                    <Suspense fallback={<LoadingSpinner />}>
+                    <Suspense fallback={
+                      <div className="min-h-screen bg-gradient-primary flex items-center justify-center">
+                        <LoadingSpinner size="large" color="white" variant="pulse" />
+                      </div>
+                    }>
                       <DigiLockerKYC />
                     </Suspense>
                   } 
@@ -121,7 +153,11 @@ function App() {
                 <Route 
                   path="/document-kyc" 
                   element={
-                    <Suspense fallback={<LoadingSpinner />}>
+                    <Suspense fallback={
+                      <div className="min-h-screen bg-gradient-primary flex items-center justify-center">
+                        <LoadingSpinner size="large" color="white" variant="ring" />
+                      </div>
+                    }>
                       <DocumentKYC />
                     </Suspense>
                   } 
@@ -129,7 +165,11 @@ function App() {
                 <Route 
                   path="/face-verification" 
                   element={
-                    <Suspense fallback={<LoadingSpinner />}>
+                    <Suspense fallback={
+                      <div className="min-h-screen bg-gradient-primary flex items-center justify-center">
+                        <LoadingSpinner size="large" color="white" variant="dots" />
+                      </div>
+                    }>
                       <FaceVerification />
                     </Suspense>
                   } 
@@ -137,7 +177,11 @@ function App() {
                 <Route 
                   path="/review" 
                   element={
-                    <Suspense fallback={<LoadingSpinner />}>
+                    <Suspense fallback={
+                      <div className="min-h-screen bg-gradient-primary flex items-center justify-center">
+                        <LoadingSpinner size="large" color="white" variant="wave" />
+                      </div>
+                    }>
                       <ReviewScreen />
                     </Suspense>
                   } 
@@ -145,7 +189,11 @@ function App() {
                 <Route 
                   path="/success" 
                   element={
-                    <Suspense fallback={<LoadingSpinner />}>
+                    <Suspense fallback={
+                      <div className="min-h-screen bg-gradient-success flex items-center justify-center">
+                        <LoadingSpinner size="large" color="white" variant="pulse" />
+                      </div>
+                    }>
                       <SuccessScreen />
                     </Suspense>
                   } 
@@ -153,7 +201,11 @@ function App() {
                 <Route 
                   path="/error" 
                   element={
-                    <Suspense fallback={<LoadingSpinner />}>
+                    <Suspense fallback={
+                      <div className="min-h-screen bg-gradient-error flex items-center justify-center">
+                        <LoadingSpinner size="large" color="white" variant="ring" />
+                      </div>
+                    }>
                       <ErrorScreen />
                     </Suspense>
                   } 

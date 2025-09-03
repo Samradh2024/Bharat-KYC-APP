@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Helmet } from 'react-helmet-async'
 import { 
   Shield, 
@@ -12,7 +12,9 @@ import {
   Wifi,
   WifiOff,
   Clock,
-  Zap
+  Zap,
+  Star,
+  Sparkles
 } from 'lucide-react'
 import { useKYC } from '../contexts/KYCContext'
 import { useNetwork } from '../contexts/NetworkContext'
@@ -25,6 +27,7 @@ const KYCSelection = () => {
   const { isOnline, shouldUseLowBandwidthMode } = useNetwork()
   const { getPendingActionsCount } = useOffline()
   const [selectedMethod, setSelectedMethod] = useState(null)
+  const [hoveredMethod, setHoveredMethod] = useState(null)
 
   const kycMethods = [
     {
@@ -34,8 +37,9 @@ const KYCSelection = () => {
       description: 'Use your DigiLocker account to instantly verify your identity with government-verified documents.',
       icon: Shield,
       color: 'primary',
-      bgColor: 'bg-primary-50',
-      borderColor: 'border-primary-200',
+      bgColor: 'bg-primary-500/20',
+      borderColor: 'border-primary-400/30',
+      gradient: 'from-primary-500/20 to-primary-600/20',
       features: [
         'Instant verification',
         'Government-verified documents',
@@ -49,6 +53,8 @@ const KYCSelection = () => {
       ],
       estimatedTime: '2-3 minutes',
       networkRequired: true,
+      badge: 'Recommended',
+      badgeColor: 'success',
     },
     {
       id: 'document',
@@ -57,8 +63,9 @@ const KYCSelection = () => {
       description: 'Upload photos of your identity documents for manual verification. Works even without internet.',
       icon: FileText,
       color: 'success',
-      bgColor: 'bg-success-50',
-      borderColor: 'border-success-200',
+      bgColor: 'bg-success-500/20',
+      borderColor: 'border-success-400/30',
+      gradient: 'from-success-500/20 to-success-600/20',
       features: [
         'Works offline',
         'Multiple document options',
@@ -72,6 +79,8 @@ const KYCSelection = () => {
       ],
       estimatedTime: '5-10 minutes',
       networkRequired: false,
+      badge: 'Offline Ready',
+      badgeColor: 'warning',
     }
   ]
 
@@ -100,8 +109,15 @@ const KYCSelection = () => {
         <meta name="description" content="Choose your preferred KYC verification method" />
       </Helmet>
 
-      <div className="min-h-screen bg-gray-50 safe-top safe-bottom">
-        <div className="container-mobile py-6">
+      <div className="min-h-screen bg-gradient-primary safe-top safe-bottom relative overflow-hidden">
+        {/* Animated background elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-10 left-5 w-20 h-20 bg-white/5 rounded-full animate-float"></div>
+          <div className="absolute top-20 right-10 w-16 h-16 bg-white/5 rounded-full animate-float" style={{ animationDelay: '2s' }}></div>
+          <div className="absolute bottom-20 left-10 w-12 h-12 bg-white/5 rounded-full animate-float" style={{ animationDelay: '4s' }}></div>
+        </div>
+
+        <div className="container-mobile py-6 relative z-10">
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -110,19 +126,21 @@ const KYCSelection = () => {
             className="mb-6"
           >
             <div className="flex items-center justify-between mb-4">
-              <button
+              <motion.button
                 onClick={handleBack}
-                className="p-2 text-gray-600 hover:text-gray-900 transition-colors"
+                className="p-3 text-white/80 hover:text-white transition-colors rounded-xl hover:bg-white/10"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
                 <ArrowLeft className="w-6 h-6" />
-              </button>
-              <h1 className="text-xl font-semibold text-gray-900">
+              </motion.button>
+              <h1 className="text-2xl font-bold text-white text-glow">
                 Choose KYC Method
               </h1>
-              <div className="w-6" />
+              <div className="w-12" />
             </div>
 
-            <p className="text-gray-600 text-center">
+            <p className="text-white/80 text-center text-lg">
               Select the method that works best for you
             </p>
           </motion.div>
@@ -134,37 +152,51 @@ const KYCSelection = () => {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="mb-6"
           >
-            <div className="space-y-3">
+            <div className="space-y-4">
               {/* Connection Status */}
-              <div className="flex items-center justify-between p-3 bg-white rounded-lg shadow-sm">
-                <div className="flex items-center space-x-3">
-                  {isOnline ? (
-                    <Wifi className="w-4 h-4 text-success-600" />
-                  ) : (
-                    <WifiOff className="w-4 h-4 text-warning-600" />
+              <motion.div 
+                className="glass-card p-4"
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.2 }}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    {isOnline ? (
+                      <Wifi className="w-5 h-5 text-success-400" />
+                    ) : (
+                      <WifiOff className="w-5 h-5 text-warning-400" />
+                    )}
+                    <span className="text-white font-medium">
+                      {isOnline ? 'Connected' : 'Offline Mode'}
+                    </span>
+                  </div>
+                  {shouldUseLowBandwidthMode() && (
+                    <span className="status-badge-warning">
+                      Slow Connection
+                    </span>
                   )}
-                  <span className="text-sm text-gray-700">
-                    {isOnline ? 'Connected' : 'Offline Mode'}
-                  </span>
                 </div>
-                {shouldUseLowBandwidthMode() && (
-                  <span className="text-xs text-warning-600 bg-warning-50 px-2 py-1 rounded">
-                    Slow Connection
-                  </span>
-                )}
-              </div>
+              </motion.div>
 
               {/* Pending Actions */}
               {pendingActionsCount > 0 && (
-                <div className="flex items-center justify-between p-3 bg-warning-50 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <Clock className="w-4 h-4 text-warning-600" />
-                    <span className="text-sm text-warning-700">
-                      {pendingActionsCount} pending action{pendingActionsCount > 1 ? 's' : ''}
-                    </span>
+                <motion.div 
+                  className="glass-card p-4 border border-warning-400/30"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  whileHover={{ scale: 1.02 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <Clock className="w-5 h-5 text-warning-400" />
+                      <span className="text-white font-medium">
+                        {pendingActionsCount} pending action{pendingActionsCount > 1 ? 's' : ''}
+                      </span>
+                    </div>
+                    <CheckCircle className="w-5 h-5 text-warning-400" />
                   </div>
-                  <CheckCircle className="w-4 h-4 text-warning-600" />
-                </div>
+                </motion.div>
               )}
             </div>
           </motion.div>
@@ -174,7 +206,7 @@ const KYCSelection = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="space-y-4 mb-8"
+            className="space-y-6 mb-8"
           >
             {kycMethods.map((method, index) => (
               <motion.div
@@ -182,90 +214,135 @@ const KYCSelection = () => {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6, delay: 0.6 + index * 0.1 }}
+                onHoverStart={() => setHoveredMethod(method.id)}
+                onHoverEnd={() => setHoveredMethod(null)}
               >
-                <button
+                <motion.button
                   onClick={() => handleMethodSelect(method)}
                   disabled={method.networkRequired && !isOnline}
-                  className={`w-full text-left p-4 rounded-lg border-2 transition-all duration-200 ${
+                  className={`w-full text-left p-6 rounded-2xl border-2 transition-all duration-300 relative overflow-hidden ${
                     selectedMethod?.id === method.id
-                      ? `${method.borderColor} ${method.bgColor} ring-2 ring-${method.color}-500 ring-opacity-50`
-                      : 'border-gray-200 bg-white hover:border-gray-300'
-                  } ${method.networkRequired && !isOnline ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-md'}`}
+                      ? `${method.borderColor} ${method.bgColor} ring-4 ring-${method.color}-400/30 shadow-2xl`
+                      : 'border-white/20 bg-white/10 backdrop-blur-lg hover:border-white/40 hover:bg-white/15'
+                  } ${method.networkRequired && !isOnline ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-2xl'}`}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                 >
-                  <div className="flex items-start space-x-4">
-                    <div className={`p-3 rounded-lg bg-${method.color}-100`}>
-                      <method.icon className={`w-6 h-6 text-${method.color}-600`} />
-                    </div>
-                    
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className="font-semibold text-gray-900">
-                          {method.title}
-                        </h3>
-                        {selectedMethod?.id === method.id && (
-                          <CheckCircle className="w-5 h-5 text-primary-600" />
-                        )}
-                      </div>
+                  {/* Background gradient overlay */}
+                  <div className={`absolute inset-0 bg-gradient-to-br ${method.gradient} opacity-0 transition-opacity duration-300 ${
+                    selectedMethod?.id === method.id ? 'opacity-100' : ''
+                  }`} />
+                  
+                  <div className="relative z-10">
+                    <div className="flex items-start space-x-4">
+                      <motion.div 
+                        className={`p-4 rounded-2xl backdrop-blur-lg border ${method.borderColor} shadow-lg ${
+                          selectedMethod?.id === method.id ? 'bg-white/20' : 'bg-white/10'
+                        }`}
+                        whileHover={{ scale: 1.05 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <method.icon className={`w-8 h-8 text-${method.color}-400`} />
+                      </motion.div>
                       
-                      <p className="text-sm text-primary-600 font-medium mb-1">
-                        {method.subtitle}
-                      </p>
-                      
-                      <p className="text-sm text-gray-600 mb-3">
-                        {method.description}
-                      </p>
-
-                      {/* Features */}
-                      <div className="mb-3">
-                        <h4 className="text-xs font-medium text-gray-700 mb-1">Key Features:</h4>
-                        <div className="flex flex-wrap gap-1">
-                          {method.features.map((feature, idx) => (
-                            <span
-                              key={idx}
-                              className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded"
-                            >
-                              {feature}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Requirements */}
-                      <div className="mb-3">
-                        <h4 className="text-xs font-medium text-gray-700 mb-1">Requirements:</h4>
-                        <div className="flex flex-wrap gap-1">
-                          {method.requirements.map((req, idx) => (
-                            <span
-                              key={idx}
-                              className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded"
-                            >
-                              {req}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Time Estimate */}
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          <Clock className="w-4 h-4 text-gray-400" />
-                          <span className="text-xs text-gray-500">
-                            {method.estimatedTime}
-                          </span>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-3">
+                          <div>
+                            <h3 className="font-bold text-white text-xl mb-1">
+                              {method.title}
+                            </h3>
+                            <p className="text-sm text-white/80 font-medium">
+                              {method.subtitle}
+                            </p>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            {method.badge && (
+                              <span className={`status-badge-${method.badgeColor} text-xs`}>
+                                {method.badge}
+                              </span>
+                            )}
+                            {selectedMethod?.id === method.id && (
+                              <motion.div
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                              >
+                                <CheckCircle className="w-6 h-6 text-primary-400" />
+                              </motion.div>
+                            )}
+                          </div>
                         </div>
                         
-                        {method.networkRequired && !isOnline && (
-                          <div className="flex items-center space-x-1">
-                            <WifiOff className="w-4 h-4 text-warning-600" />
-                            <span className="text-xs text-warning-600">
-                              Requires Internet
+                        <p className="text-sm text-white/70 mb-4 leading-relaxed">
+                          {method.description}
+                        </p>
+
+                        {/* Features */}
+                        <div className="mb-4">
+                          <h4 className="text-xs font-semibold text-white/90 mb-2 uppercase tracking-wide">Key Features:</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {method.features.map((feature, idx) => (
+                              <span
+                                key={idx}
+                                className="text-xs bg-white/10 text-white/80 px-3 py-1 rounded-full backdrop-blur-lg border border-white/20"
+                              >
+                                {feature}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Requirements */}
+                        <div className="mb-4">
+                          <h4 className="text-xs font-semibold text-white/90 mb-2 uppercase tracking-wide">Requirements:</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {method.requirements.map((req, idx) => (
+                              <span
+                                key={idx}
+                                className="text-xs bg-primary-500/20 text-primary-300 px-3 py-1 rounded-full border border-primary-400/30"
+                              >
+                                {req}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Time Estimate */}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-2">
+                            <Clock className="w-4 h-4 text-white/50" />
+                            <span className="text-xs text-white/60">
+                              {method.estimatedTime}
                             </span>
                           </div>
-                        )}
+                          
+                          {method.networkRequired && !isOnline && (
+                            <div className="flex items-center space-x-1">
+                              <WifiOff className="w-4 h-4 text-warning-400" />
+                              <span className="text-xs text-warning-400">
+                                Requires Internet
+                              </span>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </button>
+
+                  {/* Sparkles effect on hover */}
+                  <AnimatePresence>
+                    {hoveredMethod === method.id && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0 }}
+                        className="absolute top-2 right-2"
+                      >
+                        <Sparkles className="w-4 h-4 text-yellow-300 animate-pulse" />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.button>
               </motion.div>
             ))}
           </motion.div>
@@ -277,27 +354,42 @@ const KYCSelection = () => {
             transition={{ duration: 0.6, delay: 0.8 }}
             className="space-y-4"
           >
-            <button
+            <motion.button
               onClick={handleContinue}
               disabled={!selectedMethod || loading}
-              className="w-full btn-primary py-4 text-lg font-semibold touch-target"
+              className="w-full btn-primary py-5 text-xl font-bold touch-target relative overflow-hidden group"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
               {loading ? (
-                <LoadingSpinner size="small" color="white" />
+                <LoadingSpinner size="small" />
               ) : (
                 <>
-                  Continue with {selectedMethod?.title}
-                  <ArrowRight className="w-5 h-5 ml-2" />
+                  <span className="relative z-10 flex items-center justify-center">
+                    Continue with {selectedMethod?.title}
+                    <ArrowRight className="w-6 h-6 ml-3 group-hover:translate-x-1 transition-transform" />
+                  </span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </>
               )}
-            </button>
+            </motion.button>
 
             {!isOnline && (
-              <div className="text-center p-3 bg-warning-50 rounded-lg">
-                <p className="text-sm text-warning-700">
-                  You're offline. Document upload method is recommended.
+              <motion.div 
+                className="text-center p-4 glass-card border border-warning-400/30"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                <div className="flex items-center justify-center space-x-2 mb-2">
+                  <WifiOff className="w-5 h-5 text-warning-400" />
+                  <p className="text-sm text-warning-300 font-medium">
+                    You're offline
+                  </p>
+                </div>
+                <p className="text-xs text-white/70">
+                  Document upload method is recommended for offline use.
                 </p>
-              </div>
+              </motion.div>
             )}
           </motion.div>
 
@@ -308,9 +400,13 @@ const KYCSelection = () => {
             transition={{ duration: 0.6, delay: 1 }}
             className="mt-8 text-center"
           >
-            <p className="text-xs text-gray-500">
-              Need help? Contact support at support@bharatkyc.in
-            </p>
+            <div className="flex items-center justify-center space-x-2 mb-2">
+              <Star className="w-4 h-4 text-yellow-400" />
+              <p className="text-sm text-white/60">
+                Need help? Contact support at support@bharatkyc.in
+              </p>
+              <Star className="w-4 h-4 text-yellow-400" />
+            </div>
           </motion.div>
         </div>
       </div>
