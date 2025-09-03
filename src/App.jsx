@@ -1,4 +1,6 @@
 import React, { Suspense, useEffect, useState } from 'react'
+import ThemeSelector from './components/ThemeSelector';
+import { useThemeStore } from './contexts/themeStore';
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import { useQueryClient } from 'react-query'
@@ -31,6 +33,7 @@ import { initializeApp } from './utils/appInitializer'
 import { registerServiceWorker } from './utils/serviceWorker'
 
 function App() {
+  const { theme } = useThemeStore();
   const [isInitialized, setIsInitialized] = useState(false)
   const [isOnline, setIsOnline] = useState(navigator.onLine)
   const queryClient = useQueryClient()
@@ -93,7 +96,12 @@ function App() {
             <link rel="apple-touch-icon" href="/icon-192x192.png" />
           </Helmet>
 
-          <div className="min-h-screen bg-gradient-primary relative">
+          <div className={`min-h-screen bg-gradient-primary relative ${theme === 'dark' ? 'dark' : ''}`}>
+            {/* Theme Selector Icon */}
+            <div style={{ position: 'fixed', top: 16, right: 16, zIndex: 50 }}>
+              <ThemeSelector />
+            </div>
+
             {/* Offline Indicator */}
             <AnimatePresence>
               {!isOnline && (
@@ -107,7 +115,7 @@ function App() {
                 </motion.div>
               )}
             </AnimatePresence>
-            
+
             {/* Network Status */}
             <NetworkStatus />
 
